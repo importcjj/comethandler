@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>comet-client</title>
+        <script src="http://cdn.bootcss.com/jquery/3.1.0/jquery.min.js" charset="utf-8"></script>
+        <style media="screen">
+            html {
+                margin: 0;
+            }
+            div.notification-box {
+                position: absolute;
+                margin: 0;
+                background-color: #F0F8FF;
+                border-radius: 5px;
+                top: -100%;
+                right: 180px;
+                height: 60px;
+                line-height: 60px;
+                transition: top 0.5s linear;
+                box-shadow: 0 0 5px #999;
+            }
+
+            div.notification-box:hover {
+                box-shadow: 0 0 12px #999;
+            }
+
+            .shake-box {
+                animation: shake 0.1s 10;
+            }
+
+            div#message {
+                float: left;
+                height: 20px;
+                margin: 0 40px;
+            }
+
+            div#close {
+                background-color: #F08080;
+                height: 20px;
+                color: #FFF;
+                width: 20px;
+                margin: 22px 10px 0 0;
+                line-height: 20px;
+                text-align: center;
+                border-radius: 2px;
+                float: left;
+                cursor: pointer;
+            }
+
+            @keyframes shake {
+                from {right: 185px;}
+                to {right: 175px;}
+            }
+        </style>
+    </head>
+    <body>
+        <div class="notification-box">
+            <div id="message">message</div>
+            <div id="close" class="shake-box">x</div>
+        </div>
+        <script type="text/javascript">
+            $( function() {
+                subscribe();
+                $("#close").click(function() {
+                    $(".notification-box").css("top", "-100%")
+                    $(".notification-box").removeClass("shake-box");
+                });
+            });
+
+            function subscribe() {
+                $.ajax({
+                    url: "http://localhost:8080/websocket",
+                    cache: false,
+                    dataType: "text",
+                    success: function(data) {
+                        subscribe();
+                        $("#message").html(data);
+                        $(".notification-box").css("top", "60px")
+                            .addClass("shake-box");
+                    },
+                    error: function(data) {
+                        subscribe();
+                    }
+                })
+            }
+        </script>
+    </body>
+</html>

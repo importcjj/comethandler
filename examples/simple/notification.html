@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>comet-notification</title>
+        <script src="http://cdn.bootcss.com/jquery/3.1.0/jquery.min.js" charset="utf-8"></script>
+        <style media="screen">
+            div.notification {
+                position: absolute;
+                width: 800px;
+                height: 150px;
+                top: 50%;
+                left: 50%;
+                margin: -75px auto auto -400px;
+                box-shadow: 0 0 15px #999;
+            }
+
+            div.notification div.box {
+                height: 45px;
+                width: 90%;
+                margin: 50px 0 0 9%;
+            }
+
+            div.notification input {
+                float: left;
+                width: 70%;
+                height: 45px;
+                font-size: 20px;
+                font-weight: bold;
+            }
+
+            div.notification .send-btn {
+                float: left;
+                height: 50px;
+                margin-left: 2%;
+                width: 18%;
+                line-height: 50px;
+                background-color: #6495ED;
+                color: #FFF;
+                font-size: 20px;
+                font-weight: bold;
+                text-align: center;
+                border-radius: 5px;
+                cursor: pointer;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="notification">
+            <div class="box">
+                <input id="message" type="text" value="There is a new notification">
+                <div id= "send" class="send-btn">send</div>
+            </div>
+        </div>
+        <script type="text/javascript">
+            $(function() {
+                $("#send").click(function() {
+                    var message = $("#message").val();
+                    $.ajax({
+                        url: "http://localhost:8080/manager",
+                        data: {message: message},
+                        cache: false,
+                        dataType: "text"
+                    });
+                })
+            });
+        </script>
+    </body>
+</html>
