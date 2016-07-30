@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	DefaultMaxPoolSize = 20000
+	DefaultMaxPoolSize = 2000
 	DefaultTimeout     = 5 * time.Second
 )
 
@@ -24,29 +24,22 @@ type ContextPool struct {
 	mutex   *sync.RWMutex
 }
 
-func (p *ContextPool) timeOut(d time.Duration) chan bool {
-	timeout := make(chan bool)
-	go func() {
-		time.Sleep(d)
-		timeout <- true
-	}()
-	return timeout
-}
-
 func (p *ContextPool) Put(context *Context) error {
+
 	p.mutex.Lock()
 	defer p.mutex.Unlock()
 
 	if p.Length+1 > p.MaxSize {
 		return PoolOverFlowError
 	}
-	timeout := p.timeOut(p.Timeout)
+
 	select {
 	case p.Pool <- context:
 		p.Length++
-	case <-timeout:
+	case <-time.After(5 * time.Second):
 		return PoolTimeoutError
 	}
+
 	return nil
 }
 
@@ -54,11 +47,10 @@ func (p *ContextPool) Get() (context *Context, err error) {
 	p.mutex.Lock()
 	defer p.mutex.Unlock()
 
-	timeout := p.timeOut(p.Timeout)
 	select {
 	case context = <-p.Pool:
 		p.Length--
-	case <-timeout:
+	case <-time.After(5 * time.Second):
 		err = PoolTimeoutError
 	}
 	return
