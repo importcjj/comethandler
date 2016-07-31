@@ -2,6 +2,9 @@
 
 #### simple demo
 
+![](examples/simple/simple-demo.gif)
+
+##### main code
 *the complete demo is in examples/simple*
 
 ```go

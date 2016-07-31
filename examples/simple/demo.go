@@ -10,16 +10,25 @@ import (
 // New comet handler.
 var comet = comethandler.New()
 
+
+// Wrapper allowed you do something.
+func Wrapper(rw http.ResponseWriter, r *http.Request) {
+	rw.Header().Set("Access-Control-Allow-Origin", "*")
+	comet.ServeHTTP(rw, r)
+}
+
+
 // Broker to receive a message from manager client
 // and try it's best to broadcast it to all clients.
 func Broker(rw http.ResponseWriter, r *http.Request) {
+	rw.Header().Set("Access-Control-Allow-Origin", "*")
 	message := r.FormValue("message")
 	comet.Broadcast([]byte(message))
 }
 
 func main() {
 
-	http.Handle("/websocket", comet)
+	http.HandleFunc("/websocket", Wrapper)
 	http.HandleFunc("/broker", Broker)
 
 	// Send a tick to clients every minute.
