@@ -57,7 +57,7 @@
                 $("#send").click(function() {
                     var message = $("#message").val();
                     $.ajax({
-                        url: "http://localhost:8080/manager",
+                        url: "http://localhost:8080/send",
                         data: {message: message},
                         cache: false,
                         dataType: "text"

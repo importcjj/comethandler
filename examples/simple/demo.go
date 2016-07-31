@@ -2,37 +2,64 @@ package main
 
 import (
 	"net/http"
-	"runtime"
 
-	"time"
+	"fmt"
+	"io/ioutil"
+	"os"
 
 	"github.com/importcjj/comethandler"
 )
 
+func ReadHTML(name string) []byte {
+	file, err := os.Open(name)
+	if err != nil {
+		panic(err)
+	}
+
+	HTML, err := ioutil.ReadAll(file)
+	if err != nil {
+		panic(err)
+	}
+
+	return HTML
+}
+
+var ClientHTML, ManagerHTML []byte
+
+func init() {
+	ClientHTML = ReadHTML("client.html")
+	ManagerHTML = ReadHTML("notification.html")
+}
+
 // New comet handler.
 var comet = comethandler.New()
 
-func MyHandlerFunc(rw http.ResponseWriter, r *http.Request) {
-	rw.Header().Set("Access-Control-Allow-Origin", "*")
-	comet.ServeHTTP(rw, r)
+func Client(rw http.ResponseWriter, r *http.Request) {
+	rw.Write(ClientHTML)
 }
 
-func ManagerFunc(rw http.ResponseWriter, r *http.Request) {
-	rw.Header().Set("Access-Control-Allow-Origin", "*")
+func Manager(rw http.ResponseWriter, r *http.Request) {
+	rw.Write(ManagerHTML)
+}
+
+func SendFunc(rw http.ResponseWriter, r *http.Request) {
 	message := r.FormValue("message")
+	fmt.Println(message)
 	comet.Broadcast([]byte(message))
 }
 
 func main() {
-	runtime.GOMAXPROCS(2)
-	http.HandleFunc("/websocket", MyHandlerFunc)
-	http.HandleFunc("/manager", ManagerFunc)
+	http.HandleFunc("/client", Client)
+	http.HandleFunc("/manager", Manager)
 
-	go func() {
-		for now := range time.Tick(3 * time.Second) {
-			comet.Broadcast([]byte(now.Format(time.RFC850)))
-		}
-	}()
+	http.Handle("/websocket", comet)
+	http.HandleFunc("/send", SendFunc)
+
+	// go func() {
+	// 	for now := range time.Tick(5 * time.Second) {
+	// 		comet.Broadcast([]byte(now.Format(time.RFC850)))
+	// 	}
+	// }()
 
 	http.ListenAndServe(":8080", nil)
 }
